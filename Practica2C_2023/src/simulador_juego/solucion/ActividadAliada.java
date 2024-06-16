@@ -1,6 +1,14 @@
-
 import java.util.Random;
 import java.util.concurrent.TimeUnit;
+
+/**
+ * Clase que creara un hilo para simular la representacion de la actividad de un aliado
+ * 
+ * @author Elena Recio Pérez
+ * @date 16/06/2024
+ * @version 2 Convocatoria
+ * 
+ * */
 
 public class ActividadAliada extends Thread{
 	private int tipoEnemigo;
