@@ -1,6 +1,7 @@
-package simulador_juego.solucion;
+import java.util.Random;
+import java.util.concurrent.TimeUnit;
 
-public class ActividadEnemiga {
+public class ActividadEnemiga extends Thread{
 	private int tipoEnemigo;
 	private IJuego juego;
 	
@@ -10,7 +11,17 @@ public class ActividadEnemiga {
 	}
 	
 	public void run() {
-		
+		//Creamos el hilo para eliminar enemigos
+		while(!interrupted()) {
+			try {
+				//Tiempo de espera entre 1 y 5s y se elimina el enemigo de un tipo
+				TimeUnit.MILLISECONDS.sleep(new Random().nextInt(5)*1000);
+				juego.eliminarEnemigo(tipoEnemigo);
+			} catch (InterruptedException e) {
+				//finalizaria la ejecucion del hilo
+				break;
+			}
+		}
 	}
-
 }
+
