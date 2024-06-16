@@ -15,6 +15,12 @@ public class Juego {
 		contadorEnemigosTotales=new Hashtable();
 		contadoresEnemigosTipo=new Hashtable();
 		contadoresEliminadosTipo=new Hashtable();
+
+		for (int i = 0; i < MAX_TIPOS_ENEMIGOS; i++) {
+	            contadorEnemigosTotales.put(i, 0);
+	            contadoresEnemigosTipo.put(i, 0);
+	            contadoresEliminadosTipo.put(i, 0);
+	        }
 	}
 	
 	public static synchronized Juego getJuego() {
@@ -93,19 +99,33 @@ public class Juego {
         }
 	
 	
-	public int sumarContadores(int tipoEnemigo) {
-		
-	}
+	public int sumarContadores() {
+        return contadorEnemigosTotales.values().stream().mapToInt(Integer::intValue).sum();
+    }
 	
 	protected void checkInvariante() {
-		
+        assert sumarContadores() == contadoresEnemigosTipo.values().stream().mapToInt(Integer::intValue).sum() :
+                "Invariante violada: La suma de contadores de enemigos vivos no coincide con el contador total de enemigos.";
+    }
+	
+	protected synchronized void comprobarAntesDeGenerar(int tipoEnemigo) throws InterruptedException {
+	    if (tipoEnemigo > 0) {
+	        while (contadorEnemigosTotales.get(tipoEnemigo - 1) == 0) {
+	            wait();
+	        }
+	    }
+	    while (sumarContadores() >= MAXENEMIGOS) {
+	        wait();
+	    }
 	}
 	
-	protected synchronized void comprobarAntesDeGenerar() throws InterruptedException{
-		
+	protected void comprobarAntesDeEliminar(int tipoEnemigo) throws InterruptedException {
+	    while (contadoresEnemigosTipo.getOrDefault(tipoEnemigo, MINENEMIGOS) <= MINENEMIGOS) {
+	        wait();
+	    }
 	}
-	
-	protected synchronized void comprobarAntesDeEliminar() throws InterruptedException{
-		
-	}
+
+}
+
+
 }
