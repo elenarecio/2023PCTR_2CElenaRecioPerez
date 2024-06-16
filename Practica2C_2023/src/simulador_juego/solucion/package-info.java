@@ -1,1 +1,0 @@
-package simulador_juego.solucion;
