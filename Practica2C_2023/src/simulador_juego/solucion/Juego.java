@@ -1,5 +1,4 @@
-package simulador_juego.solucion;
-
+import java.util.Random;
 import java.util.Hashtable;
 
 public class Juego {
@@ -24,17 +23,75 @@ public class Juego {
 		}
 		return juego;
 	}
-	public void generarEnemigo(int tipoEnemigo) throws InterruptedException {
-		
+	public synchronized void generarEnemigo(int tipoEnemigo) throws InterruptedException {
+
+	    int tiempoEspera = new Random().nextInt(5) + 1;
+	    Thread.sleep(tiempoEspera * 1000);
+
+	    comprobarAntesDeGenerar(tipoEnemigo);
+
+	    int totalEnemigos = sumarContadores();
+	    while (totalEnemigos >= MAXENEMIGOS) {
+	        wait();
+	        totalEnemigos = sumarContadores();
+	    }
+
+	    int enemigosTipo = contadoresEnemigosTipo.getOrDefault(tipoEnemigo, MINENEMIGOS);
+	    enemigosTipo++;
+	    contadoresEnemigosTipo.put(tipoEnemigo, enemigosTipo);
+
+	    int enemigosTotal = contadorEnemigosTotales.getOrDefault(tipoEnemigo, MINENEMIGOS);
+	    enemigosTotal++;
+	    contadorEnemigosTotales.put(tipoEnemigo, enemigosTotal);
+
+	    System.out.println("   ");
+	    System.out.println("Generado enemigo tipo " + tipoEnemigo);
+	    imprimirInfo();
+
+	    checkInvariante();
+
+	    notifyAll();
 	}
+
+	public synchronized void eliminarEnemigo(int tipoEnemigo) throws InterruptedException {
+
+	    comprobarAntesDeEliminar(tipoEnemigo);
+
+	    int enemigosTipo = contadoresEnemigosTipo.getOrDefault(tipoEnemigo, MINENEMIGOS);
+	    while (enemigosTipo <= MINENEMIGOS) {
+	        wait();
+	        enemigosTipo = contadoresEnemigosTipo.getOrDefault(tipoEnemigo, MINENEMIGOS);
+	    }
+
+	    enemigosTipo--;
+	    contadoresEnemigosTipo.put(tipoEnemigo, enemigosTipo);
+
+	    int enemigosTotal = contadorEnemigosTotales.get(tipoEnemigo);
+	    enemigosTotal--;
+	    contadorEnemigosTotales.put(tipoEnemigo, enemigosTotal);
+
+	    int enemigosEliminadosTipo = contadoresEliminadosTipo.getOrDefault(tipoEnemigo, MINENEMIGOS);
+	    enemigosEliminadosTipo++;
+	    contadoresEliminadosTipo.put(tipoEnemigo, enemigosEliminadosTipo);
+
+	    System.out.println("   ");
+	    System.out.println("Eliminado enemigo tipo " + tipoEnemigo);
+	    imprimirInfo();
+
+	    checkInvariante();
+
+	    notifyAll();
+	}
+
 	
-	public void eliminarEnemigo(int tipoEenmigo) {
-		
-	}
+	private void imprimirInfo() {
+        int totalEnemigos = sumarContadores();
+        System.out.println("--> Enemigos totales: " + totalEnemigos);
+        for (int i = 0; i < MAX_TIPOS_ENEMIGOS; i++) {
+            System.out.println("----> Enemigos tipo " + i + ": " + contadoresEnemigosTipo.get(i) + " ------ [Eliminados:" + contadoresEliminadosTipo.get(i) + "]");
+            }
+        }
 	
-	private void  imprimirInfo(int tipoEnemigo) {
-		
-	}
 	
 	public int sumarContadores(int tipoEnemigo) {
 		
